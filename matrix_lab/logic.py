@@ -38,3 +38,8 @@ def validate_matrix(matrix: Matrix) -> Tuple[int, int]:
 
 def _is_zero(x: float, eps: float = EPS) -> bool:
     return abs(x) <= eps
+    
+def column_all_zero(matrix: Matrix, eps: float = EPS) -> List[bool]:
+    """Уровень 1. Вектор длины m: True, если все элементы k-го столбца нулевые."""
+    n, m = validate_matrix(matrix)
+    return [all(_is_zero(matrix[i][k], eps) for i in range(n)) for k in range(m)]
