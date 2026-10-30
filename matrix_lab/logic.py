@@ -43,3 +43,13 @@ def column_all_zero(matrix: Matrix, eps: float = EPS) -> List[bool]:
     """Уровень 1. Вектор длины m: True, если все элементы k-го столбца нулевые."""
     n, m = validate_matrix(matrix)
     return [all(_is_zero(matrix[i][k], eps) for i in range(n)) for k in range(m)]
+
+def row_descending(matrix: Matrix, eps: float = EPS) -> List[bool]:
+    """Уровень 2. Вектор длины n: True, если элементы k-й строки упорядочены
+    по убыванию (нестрого: a[j] >= a[j+1]). Строка из одного элемента — True.
+    """
+    n, m = validate_matrix(matrix)
+    return [
+        all(matrix[k][j] + eps >= matrix[k][j + 1] for j in range(m - 1))
+        for k in range(n)
+    ]
