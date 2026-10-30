@@ -28,6 +28,7 @@ def main(argv=None) -> int:
         matrix = read_matrix_file(args.file) if args.file else read_matrix_console()
         zero_cols = logic.column_all_zero(matrix)
         desc_rows = logic.row_descending(matrix)
+        sym_rows = logic.row_symmetric(matrix)
     except (OSError, ValueError) as err:
         print(f"Ошибка: {err}", file=sys.stderr)
         return 1
@@ -38,6 +39,8 @@ def main(argv=None) -> int:
     print("   ", format_vector(zero_cols))
     print("2) Элементы k-й строки упорядочены по убыванию (k = 1..n):")
     print("   ", format_vector(desc_rows))
+    print("3) k-я строка симметрична (k = 1..n):")
+    print("   ", format_vector(sym_rows))
     return 0
 
 if __name__ == "__main__":

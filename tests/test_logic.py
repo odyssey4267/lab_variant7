@@ -32,6 +32,7 @@ class TestColumnAllZero(unittest.TestCase):
 
     def test_single_row(self):
         self.assertEqual(logic.column_all_zero([[0, 5, 0]]), [True, False, True])
+
 class TestRowDescending(unittest.TestCase):
     def test_mixed(self):
         m = [[5, 3, 1], [1, 2, 3], [4, 4, 2]]
@@ -45,3 +46,16 @@ class TestRowDescending(unittest.TestCase):
 
     def test_negative(self):
         self.assertEqual(logic.row_descending([[-1, -2, -3], [-3, -2, -1]]), [True, False])
+
+class TestRowSymmetric(unittest.TestCase):
+    def test_odd_length(self):
+        self.assertEqual(logic.row_symmetric([[1, 2, 1], [1, 2, 3]]), [True, False])
+
+    def test_even_length(self):
+        self.assertEqual(logic.row_symmetric([[4, 5, 5, 4], [4, 5, 6, 4]]), [True, False])
+
+    def test_single_column(self):
+        self.assertEqual(logic.row_symmetric([[7], [8]]), [True, True])
+
+    def test_float_tolerance(self):
+        self.assertEqual(logic.row_symmetric([[0.1 + 0.2, 1.0, 0.3]]), [True])
