@@ -32,4 +32,16 @@ class TestColumnAllZero(unittest.TestCase):
 
     def test_single_row(self):
         self.assertEqual(logic.column_all_zero([[0, 5, 0]]), [True, False, True])
-        
+class TestRowDescending(unittest.TestCase):
+    def test_mixed(self):
+        m = [[5, 3, 1], [1, 2, 3], [4, 4, 2]]
+        self.assertEqual(logic.row_descending(m), [True, False, True])
+
+    def test_single_column(self):
+        self.assertEqual(logic.row_descending([[1], [2]]), [True, True])
+
+    def test_equal_elements(self):
+        self.assertEqual(logic.row_descending([[2, 2, 2]]), [True])
+
+    def test_negative(self):
+        self.assertEqual(logic.row_descending([[-1, -2, -3], [-3, -2, -1]]), [True, False])
