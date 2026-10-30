@@ -53,3 +53,16 @@ def row_descending(matrix: Matrix, eps: float = EPS) -> List[bool]:
         all(matrix[k][j] + eps >= matrix[k][j + 1] for j in range(m - 1))
         for k in range(n)
     ]
+    
+def row_symmetric(matrix: Matrix, eps: float = EPS) -> List[bool]:
+    """Уровень 3. Вектор длины n: True, если k-я строка симметрична
+    (читается одинаково слева направо и справа налево, a[j] == a[m-1-j]).
+    """
+    n, m = validate_matrix(matrix)
+    return [
+        all(
+            math.isclose(matrix[k][j], matrix[k][m - 1 - j], rel_tol=0.0, abs_tol=eps)
+            for j in range(m // 2)
+        )
+        for k in range(n)
+    ]
