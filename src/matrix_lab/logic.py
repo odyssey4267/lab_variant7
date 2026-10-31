@@ -19,6 +19,7 @@ Matrix = Sequence[Sequence[float]]
 # Допуск для сравнения вещественных чисел (ошибки округления).
 EPS = 1e-9
 
+
 def validate_matrix(matrix: Matrix) -> Tuple[int, int]:
     """Проверить, что матрица непустая и прямоугольная. Вернуть (n, m).
 
@@ -36,13 +37,16 @@ def validate_matrix(matrix: Matrix) -> Tuple[int, int]:
             )
     return len(matrix), m
 
+
 def _is_zero(x: float, eps: float = EPS) -> bool:
     return abs(x) <= eps
-    
+
+
 def column_all_zero(matrix: Matrix, eps: float = EPS) -> List[bool]:
     """Уровень 1. Вектор длины m: True, если все элементы k-го столбца нулевые."""
     n, m = validate_matrix(matrix)
     return [all(_is_zero(matrix[i][k], eps) for i in range(n)) for k in range(m)]
+
 
 def row_descending(matrix: Matrix, eps: float = EPS) -> List[bool]:
     """Уровень 2. Вектор длины n: True, если элементы k-й строки упорядочены
@@ -53,7 +57,8 @@ def row_descending(matrix: Matrix, eps: float = EPS) -> List[bool]:
         all(matrix[k][j] + eps >= matrix[k][j + 1] for j in range(m - 1))
         for k in range(n)
     ]
-    
+
+
 def row_symmetric(matrix: Matrix, eps: float = EPS) -> List[bool]:
     """Уровень 3. Вектор длины n: True, если k-я строка симметрична
     (читается одинаково слева направо и справа налево, a[j] == a[m-1-j]).

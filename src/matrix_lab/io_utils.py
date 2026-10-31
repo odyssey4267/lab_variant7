@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Iterable, List, Sequence
 
+
 def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
     """Разобрать текст: первая строка «n m», далее n строк по m чисел.
 
@@ -32,9 +33,11 @@ def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
         matrix.append(values)
     return matrix
 
+
 def read_matrix_file(path: str) -> List[List[float]]:
     with open(path, encoding="utf-8") as f:
         return parse_matrix(f)
+
 
 def read_matrix_console() -> List[List[float]]:
     """Интерактивный ввод: n и m, затем построчно матрица."""
@@ -59,8 +62,10 @@ def read_matrix_console() -> List[List[float]]:
                 print(f"Ошибка: нужно ввести ровно {m} вещественных чисел.")
     return matrix
 
+
 def format_matrix(matrix: Sequence[Sequence[float]]) -> str:
     return "\n".join("  ".join(f"{x:g}" for x in row) for row in matrix)
+
 
 def format_vector(vector: Sequence[bool]) -> str:
     return "[" + ", ".join("True" if v else "False" for v in vector) + "]"
