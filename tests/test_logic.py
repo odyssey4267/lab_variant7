@@ -2,6 +2,7 @@ import unittest
 
 from matrix_lab import logic
 
+
 class TestValidate(unittest.TestCase):
     def test_ok(self):
         self.assertEqual(logic.validate_matrix([[1, 2, 3], [4, 5, 6]]), (2, 3))
@@ -15,6 +16,7 @@ class TestValidate(unittest.TestCase):
     def test_ragged(self):
         with self.assertRaises(ValueError):
             logic.validate_matrix([[1, 2], [3]])
+
 
 class TestColumnAllZero(unittest.TestCase):
     def test_mixed(self):
@@ -33,6 +35,7 @@ class TestColumnAllZero(unittest.TestCase):
     def test_single_row(self):
         self.assertEqual(logic.column_all_zero([[0, 5, 0]]), [True, False, True])
 
+
 class TestRowDescending(unittest.TestCase):
     def test_mixed(self):
         m = [[5, 3, 1], [1, 2, 3], [4, 4, 2]]
@@ -46,6 +49,7 @@ class TestRowDescending(unittest.TestCase):
 
     def test_negative(self):
         self.assertEqual(logic.row_descending([[-1, -2, -3], [-3, -2, -1]]), [True, False])
+
 
 class TestRowSymmetric(unittest.TestCase):
     def test_odd_length(self):

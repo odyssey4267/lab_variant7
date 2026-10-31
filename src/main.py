@@ -17,6 +17,7 @@ from matrix_lab.io_utils import (
     read_matrix_file,
 )
 
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         description="Вариант 7: логические векторы по вещественной матрице n*m."
@@ -29,8 +30,8 @@ def main(argv=None) -> int:
         zero_cols = logic.column_all_zero(matrix)
         desc_rows = logic.row_descending(matrix)
         sym_rows = logic.row_symmetric(matrix)
-    except (OSError, ValueError) as err:
-        print(f"Ошибка: {err}", file=sys.stderr)
+    except (OSError, ValueError, EOFError) as err:
+        print(f"Ошибка: {str(err) or 'ввод прерван'}", file=sys.stderr)
         return 1
 
     print("\nМатрица:")
@@ -42,6 +43,7 @@ def main(argv=None) -> int:
     print("3) k-я строка симметрична (k = 1..n):")
     print("   ", format_vector(sym_rows))
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

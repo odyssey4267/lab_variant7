@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 from typing import Iterable, List, Sequence
+
 
 def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
     """Разобрать текст: первая строка «n m», далее n строк по m чисел.
@@ -29,12 +31,16 @@ def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
             raise ValueError(f"Строка {i}: не удалось прочитать число.") from None
         if len(values) != m:
             raise ValueError(f"Строка {i}: ожидалось {m} чисел, получено {len(values)}.")
+        if not all(math.isfinite(v) for v in values):
+            raise ValueError(f"Строка {i}: значения должны быть конечными числами.")
         matrix.append(values)
     return matrix
+
 
 def read_matrix_file(path: str) -> List[List[float]]:
     with open(path, encoding="utf-8") as f:
         return parse_matrix(f)
+
 
 def read_matrix_console() -> List[List[float]]:
     """Интерактивный ввод: n и m, затем построчно матрица."""
@@ -51,7 +57,7 @@ def read_matrix_console() -> List[List[float]]:
         while True:
             try:
                 row = [float(t.replace(",", ".")) for t in input(f"Строка {i}: ").split()]
-                if len(row) != m:
+                if len(row) != m or not all(math.isfinite(v) for v in row):
                     raise ValueError
                 matrix.append(row)
                 break
@@ -59,8 +65,10 @@ def read_matrix_console() -> List[List[float]]:
                 print(f"Ошибка: нужно ввести ровно {m} вещественных чисел.")
     return matrix
 
+
 def format_matrix(matrix: Sequence[Sequence[float]]) -> str:
     return "\n".join("  ".join(f"{x:g}" for x in row) for row in matrix)
+
 
 def format_vector(vector: Sequence[bool]) -> str:
     return "[" + ", ".join("True" if v else "False" for v in vector) + "]"
