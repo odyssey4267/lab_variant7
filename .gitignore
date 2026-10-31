@@ -1,6 +1,22 @@
+# Временные файлы
+*.tmp
+*.log
+
+# Каталоги сборки
+build/
+dist/
+
+# Окружение и кэш Python
+.env
+venv/
+.venv/
 __pycache__/
 *.pyc
-.venv/
+
+# Покрытие тестами
+.coverage
+htmlcov/
+
+# Файлы редакторов
 .idea/
 .vscode/
-*.zip
