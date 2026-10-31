@@ -1,7 +1,7 @@
 """Точка входа. Примеры запуска:
 
-    python main.py                       # ввод с клавиатуры
-    python main.py examples/input1.txt   # ввод из файла
+    python src/main.py                       # ввод с клавиатуры
+    python src/main.py examples/input1.txt   # ввод из файла
 """
 
 from __future__ import annotations
