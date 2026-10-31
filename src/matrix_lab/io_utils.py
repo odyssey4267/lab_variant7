@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Iterable, List, Sequence
 
 
@@ -30,6 +31,8 @@ def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
             raise ValueError(f"Строка {i}: не удалось прочитать число.") from None
         if len(values) != m:
             raise ValueError(f"Строка {i}: ожидалось {m} чисел, получено {len(values)}.")
+        if not all(math.isfinite(v) for v in values):
+            raise ValueError(f"Строка {i}: значения должны быть конечными числами.")
         matrix.append(values)
     return matrix
 
@@ -54,7 +57,7 @@ def read_matrix_console() -> List[List[float]]:
         while True:
             try:
                 row = [float(t.replace(",", ".")) for t in input(f"Строка {i}: ").split()]
-                if len(row) != m:
+                if len(row) != m or not all(math.isfinite(v) for v in row):
                     raise ValueError
                 matrix.append(row)
                 break

@@ -30,8 +30,8 @@ def main(argv=None) -> int:
         zero_cols = logic.column_all_zero(matrix)
         desc_rows = logic.row_descending(matrix)
         sym_rows = logic.row_symmetric(matrix)
-    except (OSError, ValueError) as err:
-        print(f"Ошибка: {err}", file=sys.stderr)
+    except (OSError, ValueError, EOFError) as err:
+        print(f"Ошибка: {str(err) or 'ввод прерван'}", file=sys.stderr)
         return 1
 
     print("\nМатрица:")
