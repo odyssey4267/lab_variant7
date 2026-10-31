@@ -17,6 +17,7 @@ from matrix_lab.io_utils import (
     read_matrix_file,
 )
 
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         description="Вариант 7: логические векторы по вещественной матрице n*m."
@@ -42,6 +43,7 @@ def main(argv=None) -> int:
     print("3) k-я строка симметрична (k = 1..n):")
     print("   ", format_vector(sym_rows))
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
