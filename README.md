@@ -1,7 +1,7 @@
 # MatrixLogicVectors
 
-**Автор(ы):** Фамилия Имя, группа XXX-11, 2026
-**Статус интеграции:** все модули интегрированы (ввод → обработка → вывод); добавлен REST-транспорт модуля обработки
+**Автор(ы):** Калинина Полина Т9-ИП-25-1, 2026
+**Статус интеграции:** все модули интегрированы (ввод → обработка → вывод), REST-транспорт, обработка исключений
 
 Учебный проект (дисциплина «Инструментальные средства разработки программного обеспечения»,
 вариант 7): по вещественной матрице n × m строятся логические векторы.
@@ -16,6 +16,8 @@
 3. k-я строка симметрична.
 
 Подробности — в техническом задании: `docs/technical_specification.md`.
+Система состоит из трёх интегрированных модулей (ввод, обработка, вывод) и управляющего модуля,
+стратегия интеграции — нисходящая: `docs/integration_plan.md`.
 
 ## Требования к окружению
 
@@ -27,37 +29,55 @@
 
 ```bash
 python src/main.py                        # ввод матрицы с клавиатуры
-python src/main.py examples/input1.txt   # ввод из файла
-python -m unittest discover -s tests -t .   # тесты
-flake8 src tests                          # линтинг
+python src/main.py examples/input1.txt   # ввод из файла, прямые вызовы модулей
+
+# модуль обработки как REST-сервис
+python src/serve.py --port 8080                                              # терминал 1
+python src/main.py examples/input1.txt --transport http --url http://127.0.0.1:8080   # терминал 2
 ```
 
 Формат файла: первая строка `n m`, далее `n` строк по `m` чисел через пробел
 (десятичная запятая допускается). Примеры — в каталоге `examples/`.
+
+Коды возврата: 0 — успех; 1 — некорректные данные; 2 — модуль недоступен; 3 — таймаут;
+4 — конфликт версий API.
+
+## Тесты и проверки
+
+```bash
+python -m unittest discover -s tests -t . -v
+flake8 src tests
+coverage run -m unittest discover -s tests -t . && coverage report
+```
 
 ## Структура проекта
 
 ```
 lab1_variant7/
 ├── .github/
-│   ├── ISSUE_TEMPLATE/bug_report.md   # шаблон сообщения об ошибке
-│   ├── PULL_REQUEST_TEMPLATE.md       # шаблон Pull Request
-│   └── workflows/ci.yml               # CI: flake8 + тесты
-├── docs/                              # документация
-│   ├── technical_specification.md     # ТЗ (ЛР №1)
-│   ├── architecture.md                # архитектура
-│   ├── testing.md                     # план тестирования
-│   ├── review.md                      # результаты код-ревью
-│   ├── platform_comparison.md         # сравнение платформ
-│   ├── russian_git_analogs.md         # российские аналоги Git
-│   └── report.*, LEVELS.md, IMPLEMENTATION.md, GIT_GUIDE.md   # материалы ЛР №1
-├── examples/                          # примеры входных файлов
+│   ├── ISSUE_TEMPLATE/bug_report.md
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── workflows/{ci.yml, integration.yml}
+├── docs/
+│   ├── technical_specification.md   # ТЗ (ЛР №1)
+│   ├── report.*, LEVELS.md, IMPLEMENTATION.md, GIT_GUIDE.md   # материалы ЛР №1
+│   ├── architecture.md, testing.md, review.md, platform_comparison.md, russian_git_analogs.md  # ЛР №2
+│   ├── integration_plan.md, integration.md, integration_test.md                               # ЛР №3
+│   └── error_handling.md, code_review.md, integration_strategies.md                           # ЛР №3
+├── examples/                        # примеры входных файлов
 ├── src/
-│   ├── main.py                        # точка входа
-│   └── matrix_lab/                    # логика и ввод/вывод
-├── tests/                             # модульные тесты
-├── requirements-dev.txt
-├── setup.cfg                          # настройки flake8
+│   ├── main.py                      # точка входа (сборка конвейера)
+│   ├── serve.py                     # запуск REST-сервиса обработки
+│   └── matrix_lab/
+│       ├── logic.py, io_utils.py    # логика (ЛР №1) и ввод/вывод
+│       ├── models.py, errors.py     # контракты между модулями
+│       ├── app.py                   # управляющий модуль
+│       ├── input_module.py, processing_module.py, output_module.py
+│       ├── mapping.py               # сопоставление данных (JSON)
+│       ├── server.py, http_client.py   # REST-сервис и клиент
+│       └── stubs.py                 # заглушки (нисходящая интеграция)
+├── tests/
+├── requirements-dev.txt, setup.cfg, .coveragerc
 └── README.md
 ```
 
