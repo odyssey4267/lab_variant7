@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List
 
-from .errors import InvalidDataError
+from .errors import InvalidDataError, VersionConflictError
 from .models import Matrix, ProcessingResult
 
 API_VERSION = "1.0"
@@ -91,3 +91,15 @@ def dto_to_result(dto: Any) -> ProcessingResult:
             raise InvalidDataError(f"В ответе нет поля '{json_name}'.")
         values[name] = _to_bool_list(body[json_name], json_name)
     return ProcessingResult(**values)
+
+
+def check_version(dto: Any) -> None:
+    """Проверить совместимость версии API (совпадение старшей версии).
+
+    :raises VersionConflictError: версия отсутствует или несовместима.
+    """
+    version = dto.get("api_version") if isinstance(dto, dict) else None
+    if not isinstance(version, str) or version.split(".")[0] != API_VERSION.split(".")[0]:
+        raise VersionConflictError(
+            f"Версия API {version!r} несовместима с поддерживаемой {API_VERSION}."
+        )
