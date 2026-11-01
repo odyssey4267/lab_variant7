@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from functools import partial
 
-from matrix_lab import app, stubs
+from matrix_lab import app, input_module, stubs
 
 
 def parse_args(argv=None):
@@ -22,9 +23,9 @@ def parse_args(argv=None):
 
 
 def main(argv=None) -> int:
-    parse_args(argv)
+    args = parse_args(argv)
     # Нисходящая интеграция: сначала все нижние модули — заглушки.
-    read_input = stubs.read_input_stub
+    read_input = partial(input_module.read_matrix, args.file)
     process = stubs.process_stub
     render = stubs.render_stub
     return app.run(read_input, process, render)
