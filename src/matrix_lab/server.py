@@ -8,10 +8,11 @@
 from __future__ import annotations
 
 import json
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import mapping
-from .errors import InvalidDataError
+from .errors import InvalidDataError, VersionConflictError
 from .processing_module import process
 
 API_PREFIX = "/api/v1"
@@ -44,19 +45,29 @@ class ProcessingHandler(BaseHTTPRequestHandler):
         if self.path != f"{API_PREFIX}/process":
             self._send(404, {"error": "not_found"})
             return
+        time.sleep(self.server.delay)  # имитация медленного модуля (для проверки таймаута)
         try:
             length = int(self.headers.get("Content-Length", 0))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            mapping.check_version(payload)
             matrix = mapping.dto_to_matrix(payload)
             result = process(matrix)
+        except VersionConflictError as err:
+            self._send(409, {"error": "version_conflict", "message": str(err)})
+            return
         except (ValueError, InvalidDataError) as err:  # ValueError включает ошибки JSON
             self._send(400, {"error": "invalid_data", "message": str(err)})
             return
         self._send(200, mapping.result_to_dto(result))
 
 
-def make_server(host: str = "127.0.0.1", port: int = 8080) -> ThreadingHTTPServer:
-    """Создать (но не запускать) HTTP-сервер модуля обработки."""
+def make_server(host: str = "127.0.0.1", port: int = 8080,
+                delay: float = 0.0) -> ThreadingHTTPServer:
+    """Создать (но не запускать) HTTP-сервер модуля обработки.
+
+    delay — искусственная задержка ответа в секундах (для проверки таймаута).
+    """
     server = ThreadingHTTPServer((host, port), ProcessingHandler)
     server.daemon_threads = True
+    server.delay = delay
     return server

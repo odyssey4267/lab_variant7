@@ -25,7 +25,7 @@ class TestServe(unittest.TestCase):
                 code = serve.main(["--port", "9999"])
         self.assertEqual(code, 0)
         self.assertTrue(fake.closed)
-        factory.assert_called_once_with("127.0.0.1", 9999)
+        factory.assert_called_once_with("127.0.0.1", 9999, delay=0.0)
         self.assertIn("Сервис запущен", out.getvalue())
 
 
