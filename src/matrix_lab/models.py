@@ -7,7 +7,8 @@ from typing import List
 
 Matrix = List[List[float]]
 
-frozen=True
+
+@dataclass(frozen=True)
 class ProcessingResult:
     """Результат модуля обработки: три логических вектора (позиции с 0)."""
 
@@ -15,7 +16,8 @@ class ProcessingResult:
     descending_rows: List[bool]  # длина n: строка упорядочена по убыванию
     symmetric_rows: List[bool]   # длина n: строка симметрична
 
-frozen=True
+
+@dataclass(frozen=True)
 class Report:
     """Данные для модуля вывода: исходная матрица и три вектора."""
 
