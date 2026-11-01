@@ -27,6 +27,7 @@ from .models import Matrix, ProcessingResult
 DEFAULT_URL = "http://127.0.0.1:8080"
 DEFAULT_TIMEOUT = 5.0
 TIMEOUT_ERRORS = (socket.timeout, TimeoutError)
+NETWORK_ERRORS = (urllib.error.URLError, ConnectionError) + TIMEOUT_ERRORS
 
 
 def _server_message(err: urllib.error.HTTPError) -> str:
@@ -35,6 +36,26 @@ def _server_message(err: urllib.error.HTTPError) -> str:
         return str(json.loads(err.read().decode("utf-8")).get("message", err.reason))
     except (ValueError, OSError):
         return str(err.reason)
+
+
+def _http_error(err: urllib.error.HTTPError) -> IntegrationError:
+    """HTTP-статус ошибки -> исключение интеграции."""
+    message = _server_message(err)
+    if err.code == 400:
+        return InvalidDataError(message)
+    if err.code == 409:
+        return VersionConflictError(message)
+    return IntegrationError(f"Сервис вернул HTTP {err.code}: {message}")
+
+
+def _network_error(err: Exception, timeout: float) -> IntegrationError:
+    """Сетевой сбой -> таймаут или недоступность модуля."""
+    reason = err.reason if isinstance(err, urllib.error.URLError) else err
+    if isinstance(reason, TIMEOUT_ERRORS):
+        return ModuleTimeoutError(f"Сервис не ответил за {timeout} с.")
+    if isinstance(err, urllib.error.URLError):
+        return ModuleUnavailableError(f"Сервис недоступен: {err.reason}")
+    return ModuleUnavailableError(f"Соединение разорвано: {err}")
 
 
 def process_remote(matrix: Matrix, base_url: str = DEFAULT_URL,
@@ -54,20 +75,9 @@ def process_remote(matrix: Matrix, base_url: str = DEFAULT_URL,
         with urllib.request.urlopen(request, timeout=timeout) as response:
             body = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as err:  # подкласс URLError — обрабатывается первым
-        message = _server_message(err)
-        if err.code == 400:
-            raise InvalidDataError(message) from err
-        if err.code == 409:
-            raise VersionConflictError(message) from err
-        raise IntegrationError(f"Сервис вернул HTTP {err.code}: {message}") from err
-    except TIMEOUT_ERRORS as err:
-        raise ModuleTimeoutError(f"Сервис не ответил за {timeout} с.") from err
-    except urllib.error.URLError as err:
-        if isinstance(err.reason, TIMEOUT_ERRORS):
-            raise ModuleTimeoutError(f"Сервис не ответил за {timeout} с.") from err
-        raise ModuleUnavailableError(f"Сервис недоступен: {err.reason}") from err
-    except ConnectionError as err:
-        raise ModuleUnavailableError(f"Соединение разорвано: {err}") from err
+        raise _http_error(err) from err
+    except NETWORK_ERRORS as err:
+        raise _network_error(err, timeout) from err
     except ValueError as err:
         raise InvalidDataError(f"Некорректный ответ сервиса: {err}") from err
     mapping.check_version(body)
