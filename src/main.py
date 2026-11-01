@@ -11,7 +11,7 @@ import argparse
 import sys
 from functools import partial
 
-from matrix_lab import app, input_module, processing_module, stubs
+from matrix_lab import app, input_module, output_module, processing_module
 
 
 def parse_args(argv=None):
@@ -24,10 +24,10 @@ def parse_args(argv=None):
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-    # Нисходящая интеграция: сначала все нижние модули — заглушки.
+    # Нисходящая интеграция завершена: заглушки заменены настоящими модулями.
     read_input = partial(input_module.read_matrix, args.file)
     process = processing_module.process
-    render = stubs.render_stub
+    render = output_module.render
     return app.run(read_input, process, render)
 
 
