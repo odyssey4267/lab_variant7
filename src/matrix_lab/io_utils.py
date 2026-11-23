@@ -66,8 +66,14 @@ def read_matrix_console() -> List[List[float]]:
     return matrix
 
 
+def _format_number(x: float) -> str:
+    """Число без потери точности: кратчайшая запись, возвращающая то же значение."""
+    text = repr(x + 0.0)  # «+ 0.0» превращает -0.0 в 0.0
+    return text[:-2] if text.endswith(".0") else text
+
+
 def format_matrix(matrix: Sequence[Sequence[float]]) -> str:
-    return "\n".join("  ".join(f"{x:g}" for x in row) for row in matrix)
+    return "\n".join("  ".join(_format_number(x) for x in row) for row in matrix)
 
 
 def format_vector(vector: Sequence[bool]) -> str:
