@@ -16,6 +16,10 @@ __pycache__/
 # Покрытие тестами
 .coverage
 htmlcov/
+coverage.xml
+coverage.json
+.pytest_cache/
+.mutants/
 
 # Файлы редакторов
 .idea/
