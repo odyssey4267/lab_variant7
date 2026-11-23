@@ -16,7 +16,10 @@ from .errors import InvalidDataError, VersionConflictError
 from .processing_module import process
 
 API_PREFIX = "/api/v1"
+MAX_BODY = 1024 * 1024  # предельный размер тела запроса, байт
 
+class _PayloadTooLarge(Exception):
+    """Заявленный размер тела запроса превышает MAX_BODY."""
 
 class ProcessingHandler(BaseHTTPRequestHandler):
     server_version = "MatrixService/1.0"
@@ -35,6 +38,18 @@ class ProcessingHandler(BaseHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError):
             pass  # клиент уже закрыл соединение
 
+    def _read_body(self) -> bytes:
+        """Прочитать тело запроса, предварительно проверив заголовок Content-Length."""
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            raise InvalidDataError("Некорректный заголовок Content-Length.") from None
+        if length < 0:
+            raise InvalidDataError("Content-Length не может быть отрицательным.")
+        if length > MAX_BODY:
+            raise _PayloadTooLarge(f"Тело запроса больше {MAX_BODY} байт.")
+        return self.rfile.read(length)
+
     def do_GET(self):
         if self.path == f"{API_PREFIX}/health":
             self._send(200, {"status": "ok", "api_version": mapping.API_VERSION})
@@ -47,11 +62,13 @@ class ProcessingHandler(BaseHTTPRequestHandler):
             return
         time.sleep(self.server.delay)  # имитация медленного модуля (для проверки таймаута)
         try:
-            length = int(self.headers.get("Content-Length", 0))
-            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            payload = json.loads(self._read_body().decode("utf-8"))
             mapping.check_version(payload)
             matrix = mapping.dto_to_matrix(payload)
             result = process(matrix)
+        except _PayloadTooLarge as err:
+            self._send(413, {"error": "payload_too_large", "message": str(err)})
+            return
         except VersionConflictError as err:
             self._send(409, {"error": "version_conflict", "message": str(err)})
             return
@@ -59,7 +76,6 @@ class ProcessingHandler(BaseHTTPRequestHandler):
             self._send(400, {"error": "invalid_data", "message": str(err)})
             return
         self._send(200, mapping.result_to_dto(result))
-
 
 def make_server(host: str = "127.0.0.1", port: int = 8080,
                 delay: float = 0.0) -> ThreadingHTTPServer:

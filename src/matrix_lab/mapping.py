@@ -22,10 +22,8 @@ RESULT_FIELDS = (
     ("symmetric_rows", "symmetricRows"),
 )
 
-
 def _is_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
-
 
 def matrix_to_dto(matrix: Matrix) -> Dict[str, Any]:
     """Matrix -> JSON-объект запроса (rows и cols вычисляются по данным)."""
@@ -36,6 +34,17 @@ def matrix_to_dto(matrix: Matrix) -> Dict[str, Any]:
         "matrix": {"rows": rows, "cols": cols, "data": [[float(x) for x in r] for r in matrix]},
     }
 
+def _to_float(value: Any, row: int) -> float:
+    """Элемент JSON-матрицы -> float; нечисла, nan, inf и слишком большие целые отвергаются."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise InvalidDataError(f"Строка {row}: значения должны быть конечными числами.")
+    try:
+        number = float(value)
+    except OverflowError:
+        raise InvalidDataError(f"Строка {row}: число слишком велико.") from None
+    if not math.isfinite(number):
+        raise InvalidDataError(f"Строка {row}: значения должны быть конечными числами.")
+    return number
 
 def dto_to_matrix(dto: Any) -> Matrix:
     """JSON-объект запроса -> Matrix с полной проверкой структуры и значений."""
@@ -51,12 +60,8 @@ def dto_to_matrix(dto: Any) -> Matrix:
     for i, row in enumerate(data, start=1):
         if not isinstance(row, list) or len(row) != cols:
             raise InvalidDataError(f"Строка {i}: ожидалось {cols} чисел.")
-        for x in row:
-            if isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x):
-                raise InvalidDataError(f"Строка {i}: значения должны быть конечными числами.")
-        matrix.append([float(x) for x in row])
+        matrix.append([_to_float(x, i) for x in row])
     return matrix
-
 
 def result_to_dto(result: ProcessingResult) -> Dict[str, Any]:
     """ProcessingResult -> JSON-объект ответа."""
@@ -64,7 +69,6 @@ def result_to_dto(result: ProcessingResult) -> Dict[str, Any]:
         "api_version": API_VERSION,
         "result": {json_name: list(getattr(result, name)) for name, json_name in RESULT_FIELDS},
     }
-
 
 def _to_bool_list(value: Any, name: str) -> List[bool]:
     if not isinstance(value, list):
@@ -79,7 +83,6 @@ def _to_bool_list(value: Any, name: str) -> List[bool]:
             raise InvalidDataError(f"Поле '{name}': допустимы только true/false (или 0/1).")
     return out
 
-
 def dto_to_result(dto: Any) -> ProcessingResult:
     """JSON-объект ответа -> ProcessingResult."""
     if not isinstance(dto, dict) or not isinstance(dto.get("result"), dict):
@@ -90,8 +93,10 @@ def dto_to_result(dto: Any) -> ProcessingResult:
         if json_name not in body:
             raise InvalidDataError(f"В ответе нет поля '{json_name}'.")
         values[name] = _to_bool_list(body[json_name], json_name)
-    return ProcessingResult(**values)
+    return Processin
 
+
+gResult(**values)
 
 def check_version(dto: Any) -> None:
     """Проверить совместимость версии API (совпадение старшей версии).
