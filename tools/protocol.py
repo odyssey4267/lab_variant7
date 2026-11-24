@@ -21,6 +21,7 @@ LIMIT = 70
 HEADER = ("| ID | Описание | Входные данные | Ожидаемый результат | Фактический результат "
           "| Вердикт |\n|---|---|---|---|---|---|\n")
 
+
 def load_groups():
     groups = []
     for name in MODULES:
@@ -28,9 +29,11 @@ def load_groups():
             groups.extend(importlib.import_module(name).GROUPS)
     return groups
 
+
 def cell(text):
     text = str(text).replace("|", "\\|").replace("\n", " ")
     return text if len(text) <= LIMIT else text[:LIMIT - 1] + "…"
+
 
 def build(title):
     from tests.cases import expected_text, input_text, run_case
@@ -57,6 +60,7 @@ def build(title):
         lines.append("Не пройдены: " + ", ".join(failed) + ".")
     return "\n".join(lines) + "\n", total, passed
 
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Протокол тестирования по таблицам случаев.")
     parser.add_argument("--out", required=True)
@@ -67,6 +71,7 @@ def main(argv=None):
         f.write(text)
     print(f"Записано {args.out}: случаев {total}, пройдено {passed}, не пройдено {total - passed}")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
