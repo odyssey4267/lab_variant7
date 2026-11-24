@@ -22,7 +22,7 @@ GROUPS = [
              InvalidDataError, "Таймаут"),
         Case("TC-C-07", "таймаут = nan", CLIENT, (M, OK_URL, float("nan")),
              InvalidDataError, "Таймаут"),
-        Case("TC-C-08", "корректные аргументы, порт закрыт", CLIENT, (M, OK_URL, 1.0),
-             ModuleUnavailableError, "недоступен"),
+        Case("TC-C-08", "корректные аргументы, порт закрыт", CLIENT, (M, OK_URL, 5.0),
+     ModuleUnavailableError, "недоступен"),
     ]),
 ]

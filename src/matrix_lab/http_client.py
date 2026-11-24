@@ -13,6 +13,7 @@ import json
 import socket
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 
 from . import mapping
 from .errors import (
@@ -29,14 +30,12 @@ DEFAULT_TIMEOUT = 5.0
 TIMEOUT_ERRORS = (socket.timeout, TimeoutError)
 NETWORK_ERRORS = (urllib.error.URLError, ConnectionError) + TIMEOUT_ERRORS
 
-
 def _server_message(err: urllib.error.HTTPError) -> str:
     """Достать текст ошибки из JSON-ответа сервиса (если он есть)."""
     try:
         return str(json.loads(err.read().decode("utf-8")).get("message", err.reason))
     except (ValueError, OSError):
         return str(err.reason)
-
 
 def _http_error(err: urllib.error.HTTPError) -> IntegrationError:
     """HTTP-статус ошибки -> исключение интеграции."""
@@ -47,7 +46,6 @@ def _http_error(err: urllib.error.HTTPError) -> IntegrationError:
         return VersionConflictError(message)
     return IntegrationError(f"Сервис вернул HTTP {err.code}: {message}")
 
-
 def _network_error(err: Exception, timeout: float) -> IntegrationError:
     """Сетевой сбой -> таймаут или недоступность модуля."""
     reason = err.reason if isinstance(err, urllib.error.URLError) else err
@@ -57,10 +55,19 @@ def _network_error(err: Exception, timeout: float) -> IntegrationError:
         return ModuleUnavailableError(f"Сервис недоступен: {err.reason}")
     return ModuleUnavailableError(f"Соединение разорвано: {err}")
 
+def _check_arguments(base_url: str, timeout: float) -> None:
+    """Проверить адрес сервиса и таймаут до отправки запроса."""
+    parts = urlsplit(base_url)
+    if parts.scheme not in ("http", "https") or not parts.netloc:
+        raise InvalidDataError(
+            f"Некорректный адрес сервиса {base_url!r}: ожидается http://хост:порт.")
+    if not timeout > 0:
+        raise InvalidDataError("Таймаут должен быть положительным числом секунд.")
 
 def process_remote(matrix: Matrix, base_url: str = DEFAULT_URL,
                    timeout: float = DEFAULT_TIMEOUT) -> ProcessingResult:
     """Отправить матрицу удалённому модулю обработки и получить результат."""
+    _check_arguments(base_url, timeout)
     try:
         payload = json.dumps(mapping.matrix_to_dto(matrix), allow_nan=False).encode("utf-8")
     except ValueError as err:
@@ -82,3 +89,4 @@ def process_remote(matrix: Matrix, base_url: str = DEFAULT_URL,
         raise InvalidDataError(f"Некорректный ответ сервиса: {err}") from err
     mapping.check_version(body)
     return mapping.dto_to_result(body)
+    

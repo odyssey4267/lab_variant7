@@ -93,10 +93,7 @@ def dto_to_result(dto: Any) -> ProcessingResult:
         if json_name not in body:
             raise InvalidDataError(f"В ответе нет поля '{json_name}'.")
         values[name] = _to_bool_list(body[json_name], json_name)
-    return Processin
-
-
-gResult(**values)
+    return ProcessingResult(**values)
 
 def check_version(dto: Any) -> None:
     """Проверить совместимость версии API (совпадение старшей версии).
