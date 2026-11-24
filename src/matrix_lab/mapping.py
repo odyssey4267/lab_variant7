@@ -37,6 +37,19 @@ def matrix_to_dto(matrix: Matrix) -> Dict[str, Any]:
     }
 
 
+def _to_float(value: Any, row: int) -> float:
+    """Элемент JSON-матрицы -> float; нечисла, nan, inf и слишком большие целые отвергаются."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise InvalidDataError(f"Строка {row}: значения должны быть конечными числами.")
+    try:
+        number = float(value)
+    except OverflowError:
+        raise InvalidDataError(f"Строка {row}: число слишком велико.") from None
+    if not math.isfinite(number):
+        raise InvalidDataError(f"Строка {row}: значения должны быть конечными числами.")
+    return number
+
+
 def dto_to_matrix(dto: Any) -> Matrix:
     """JSON-объект запроса -> Matrix с полной проверкой структуры и значений."""
     if not isinstance(dto, dict) or not isinstance(dto.get("matrix"), dict):
@@ -51,10 +64,7 @@ def dto_to_matrix(dto: Any) -> Matrix:
     for i, row in enumerate(data, start=1):
         if not isinstance(row, list) or len(row) != cols:
             raise InvalidDataError(f"Строка {i}: ожидалось {cols} чисел.")
-        for x in row:
-            if isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x):
-                raise InvalidDataError(f"Строка {i}: значения должны быть конечными числами.")
-        matrix.append([float(x) for x in row])
+        matrix.append([_to_float(x, i) for x in row])
     return matrix
 
 

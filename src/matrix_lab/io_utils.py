@@ -6,6 +6,13 @@ import math
 from typing import Iterable, List, Sequence
 
 
+def _parse_number(token: str) -> float:
+    """Прочитать число; десятичная запятая допускается, разделители «_» — нет."""
+    if "_" in token:
+        raise ValueError(token)
+    return float(token.replace(",", "."))
+
+
 def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
     """Разобрать текст: первая строка «n m», далее n строк по m чисел.
 
@@ -16,7 +23,7 @@ def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
     if not rows:
         raise ValueError("Пустой ввод.")
     head = rows[0].split()
-    if len(head) != 2 or not all(t.isdigit() for t in head):
+    if len(head) != 2 or not all(t.isascii() and t.isdigit() for t in head):
         raise ValueError("Первая строка должна содержать два целых числа: n m.")
     n, m = int(head[0]), int(head[1])
     if n < 1 or m < 1:
@@ -26,7 +33,7 @@ def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
     matrix: List[List[float]] = []
     for i, line in enumerate(rows[1:], start=1):
         try:
-            values = [float(t.replace(",", ".")) for t in line.split()]
+            values = [_parse_number(t) for t in line.split()]
         except ValueError:
             raise ValueError(f"Строка {i}: не удалось прочитать число.") from None
         if len(values) != m:
@@ -38,7 +45,7 @@ def parse_matrix(lines: Iterable[str]) -> List[List[float]]:
 
 
 def read_matrix_file(path: str) -> List[List[float]]:
-    with open(path, encoding="utf-8") as f:
+    with open(path, encoding="utf-8-sig") as f:
         return parse_matrix(f)
 
 
@@ -56,7 +63,7 @@ def read_matrix_console() -> List[List[float]]:
     for i in range(1, n + 1):
         while True:
             try:
-                row = [float(t.replace(",", ".")) for t in input(f"Строка {i}: ").split()]
+                row = [_parse_number(t) for t in input(f"Строка {i}: ").split()]
                 if len(row) != m or not all(math.isfinite(v) for v in row):
                     raise ValueError
                 matrix.append(row)

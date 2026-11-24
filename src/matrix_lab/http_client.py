@@ -13,6 +13,7 @@ import json
 import socket
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 
 from . import mapping
 from .errors import (
@@ -58,9 +59,20 @@ def _network_error(err: Exception, timeout: float) -> IntegrationError:
     return ModuleUnavailableError(f"Соединение разорвано: {err}")
 
 
+def _check_arguments(base_url: str, timeout: float) -> None:
+    """Проверить адрес сервиса и таймаут до отправки запроса."""
+    parts = urlsplit(base_url)
+    if parts.scheme not in ("http", "https") or not parts.netloc:
+        raise InvalidDataError(
+            f"Некорректный адрес сервиса {base_url!r}: ожидается http://хост:порт.")
+    if not timeout > 0:
+        raise InvalidDataError("Таймаут должен быть положительным числом секунд.")
+
+
 def process_remote(matrix: Matrix, base_url: str = DEFAULT_URL,
                    timeout: float = DEFAULT_TIMEOUT) -> ProcessingResult:
     """Отправить матрицу удалённому модулю обработки и получить результат."""
+    _check_arguments(base_url, timeout)
     try:
         payload = json.dumps(mapping.matrix_to_dto(matrix), allow_nan=False).encode("utf-8")
     except ValueError as err:
