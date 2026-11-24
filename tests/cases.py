@@ -16,6 +16,7 @@ from matrix_lab.errors import InvalidDataError  # noqa: F401  (использу�
 
 EPS = 1e-9
 
+
 @dataclass(frozen=True)
 class Case:
     id: str
@@ -26,17 +27,21 @@ class Case:
     match: str = ""     # регулярное выражение для текста исключения
     shown: str = ""     # как показать входные данные в протоколе (по умолчанию repr аргументов)
 
+
 @dataclass(frozen=True)
 class Outcome:
     actual: str
     passed: bool
 
+
 def _resolve(call):
     module_name, func_name = call.split(":")
     return getattr(importlib.import_module(module_name), func_name)
 
+
 def _is_error(expected):
     return isinstance(expected, type) and issubclass(expected, BaseException)
+
 
 def run_case(case):
     """Выполнить случай и вернуть фактический результат с вердиктом."""
@@ -52,19 +57,23 @@ def run_case(case):
         return Outcome(repr(value), False)
     return Outcome(repr(value), value == case.expected)
 
+
 def expected_text(case):
     if _is_error(case.expected):
         extra = f" («{case.match}»)" if case.match else ""
         return f"{case.expected.__name__}{extra}"
     return repr(case.expected)
 
+
 def input_text(case):
     return case.shown or ", ".join(repr(a) for a in case.args)
+
 
 def check_case(case):
     outcome = run_case(case)
     assert outcome.passed, (f"{case.id}: ожидалось {expected_text(case)}, "
                             f"получено {outcome.actual}")
+
 
 LOGIC = "matrix_lab.logic"
 IO = "matrix_lab.io_utils"

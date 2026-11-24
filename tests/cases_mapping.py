@@ -6,8 +6,10 @@ from tests.cases import Case
 
 MAP = "matrix_lab.mapping"
 
+
 def dto(rows=1, cols=1, data=((0,),)):
     return {"matrix": {"rows": rows, "cols": cols, "data": [list(r) for r in data]}}
+
 
 BIG_INT = 10 ** 400
 
@@ -69,7 +71,7 @@ TO_RESULT = [
          ({"result": {"zeroColumns": [-1], "descendingRows": [], "symmetricRows": []}},),
          InvalidDataError, "true/false"),
     Case("TC-M-24", "нет одного из полей", f"{MAP}:dto_to_result",
-         ({"result":{"zeroColumns": []}},), InvalidDataError, "descendingRows"),
+         ({"result": {"zeroColumns": []}},), InvalidDataError, "descendingRows"),
 ]
 
 GROUPS = [
@@ -77,4 +79,3 @@ GROUPS = [
     ("mapping.check_version", VERSION),
     ("mapping.dto_to_result", TO_RESULT),
 ]
-

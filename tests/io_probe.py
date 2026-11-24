@@ -5,6 +5,7 @@ import tempfile
 
 from matrix_lab.io_utils import read_matrix_file
 
+
 def read_file_with_bom():
     """Файл «2 1 / 5 / 6», сохранённый как UTF-8 с BOM (так сохраняет Блокнот Windows)."""
     with tempfile.TemporaryDirectory() as tmp:

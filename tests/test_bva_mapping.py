@@ -7,6 +7,7 @@ from tests.cases import check_case
 
 pytestmark = pytest.mark.blackbox
 
+
 @pytest.mark.parametrize("case", TO_MATRIX + VERSION + TO_RESULT, ids=lambda c: c.id)
 def test_mapping_cases(case):
     check_case(case)

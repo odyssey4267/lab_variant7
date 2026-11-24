@@ -22,8 +22,10 @@ RESULT_FIELDS = (
     ("symmetric_rows", "symmetricRows"),
 )
 
+
 def _is_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
+
 
 def matrix_to_dto(matrix: Matrix) -> Dict[str, Any]:
     """Matrix -> JSON-объект запроса (rows и cols вычисляются по данным)."""
@@ -33,6 +35,7 @@ def matrix_to_dto(matrix: Matrix) -> Dict[str, Any]:
         "api_version": API_VERSION,
         "matrix": {"rows": rows, "cols": cols, "data": [[float(x) for x in r] for r in matrix]},
     }
+
 
 def _to_float(value: Any, row: int) -> float:
     """Элемент JSON-матрицы -> float; нечисла, nan, inf и слишком большие целые отвергаются."""
@@ -45,6 +48,7 @@ def _to_float(value: Any, row: int) -> float:
     if not math.isfinite(number):
         raise InvalidDataError(f"Строка {row}: значения должны быть конечными числами.")
     return number
+
 
 def dto_to_matrix(dto: Any) -> Matrix:
     """JSON-объект запроса -> Matrix с полной проверкой структуры и значений."""
@@ -63,12 +67,14 @@ def dto_to_matrix(dto: Any) -> Matrix:
         matrix.append([_to_float(x, i) for x in row])
     return matrix
 
+
 def result_to_dto(result: ProcessingResult) -> Dict[str, Any]:
     """ProcessingResult -> JSON-объект ответа."""
     return {
         "api_version": API_VERSION,
         "result": {json_name: list(getattr(result, name)) for name, json_name in RESULT_FIELDS},
     }
+
 
 def _to_bool_list(value: Any, name: str) -> List[bool]:
     if not isinstance(value, list):
@@ -83,6 +89,7 @@ def _to_bool_list(value: Any, name: str) -> List[bool]:
             raise InvalidDataError(f"Поле '{name}': допустимы только true/false (или 0/1).")
     return out
 
+
 def dto_to_result(dto: Any) -> ProcessingResult:
     """JSON-объект ответа -> ProcessingResult."""
     if not isinstance(dto, dict) or not isinstance(dto.get("result"), dict):
@@ -94,6 +101,7 @@ def dto_to_result(dto: Any) -> ProcessingResult:
             raise InvalidDataError(f"В ответе нет поля '{json_name}'.")
         values[name] = _to_bool_list(body[json_name], json_name)
     return ProcessingResult(**values)
+
 
 def check_version(dto: Any) -> None:
     """Проверить совместимость версии API (совпадение старшей версии).

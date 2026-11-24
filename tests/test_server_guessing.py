@@ -9,6 +9,7 @@ pytestmark = pytest.mark.blackbox
 
 CASES = [case for _, group in GROUPS for case in group]
 
+
 @pytest.mark.parametrize("case", CASES, ids=lambda c: c.id)
 def test_server_request_cases(case):
     check_case(case)

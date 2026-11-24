@@ -18,8 +18,10 @@ from .processing_module import process
 API_PREFIX = "/api/v1"
 MAX_BODY = 1024 * 1024  # предельный размер тела запроса, байт
 
+
 class _PayloadTooLarge(Exception):
     """Заявленный размер тела запроса превышает MAX_BODY."""
+
 
 class ProcessingHandler(BaseHTTPRequestHandler):
     server_version = "MatrixService/1.0"
@@ -76,6 +78,7 @@ class ProcessingHandler(BaseHTTPRequestHandler):
             self._send(400, {"error": "invalid_data", "message": str(err)})
             return
         self._send(200, mapping.result_to_dto(result))
+
 
 def make_server(host: str = "127.0.0.1", port: int = 8080,
                 delay: float = 0.0) -> ThreadingHTTPServer:

@@ -9,15 +9,18 @@ from matrix_lab.models import ProcessingResult, Report
 
 pytestmark = pytest.mark.blackbox
 
+
 def test_processing_result_is_immutable():
     result = ProcessingResult([True], [True], [True])
     with pytest.raises(dataclasses.FrozenInstanceError):
         result.zero_columns = []
 
+
 def test_report_is_immutable():
     report = Report([[1.0]], [True], [True], [True])
     with pytest.raises(dataclasses.FrozenInstanceError):
         report.matrix = []
+
 
 @pytest.mark.parametrize("cls, code", [
     (errors.InvalidDataError, 1),
@@ -29,8 +32,10 @@ def test_error_exit_codes(cls, code):
     assert cls.exit_code == code
     assert issubclass(cls, errors.IntegrationError)
 
+
 def test_integration_error_default_code():
     assert errors.IntegrationError.exit_code == 1
+
 
 def test_stubs_follow_the_contract():
     matrix = stubs.read_input_stub()

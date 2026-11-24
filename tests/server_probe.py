@@ -11,6 +11,7 @@ VALID = (b'{"api_version": "1.0", "matrix": {"rows": 1, "cols": 1, "data": [[0.0
 HUGE_INT = (b'{"api_version": "1.0", "matrix": {"rows": 1, "cols": 1, "data": [[' + b"9" * 400
             + b']]}}')
 
+
 def _scenario(kind):
     """Вернуть (заголовки, тело) для вида запроса."""
     if kind == "valid":
@@ -32,6 +33,7 @@ def _scenario(kind):
     if kind == "huge_int_json":
         return [("Content-Length", len(HUGE_INT))], HUGE_INT
     raise ValueError(kind)
+
 
 def status_for(kind):
     """Отправить запрос вида kind и вернуть HTTP-статус, 'timeout' или 'no-response'."""
