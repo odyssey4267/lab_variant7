@@ -11,6 +11,7 @@ from matrix_lab.db.session import init_db, make_engine  # noqa: E402
 def main() -> None:
     engine = make_engine()
     init_db(engine)
+    engine.dispose()
     print("Таблицы созданы:", engine.url)
 
 

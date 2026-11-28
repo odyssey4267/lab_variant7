@@ -27,6 +27,7 @@ def main() -> None:
         print("Анализ", analysis.id, "->", repo.analysis_vectors(analysis))
     finally:
         session.close()
+        session.get_bind().dispose()
 
 
 if __name__ == "__main__":
