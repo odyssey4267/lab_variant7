@@ -1,0 +1,61 @@
+name: Database
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  storage:
+    name: Хранилище, миграции и API (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.12"]
+    env:
+      DATABASE_URL: sqlite:///ci.db
+    steps:
+      - name: Получить исходный код
+        uses: actions/checkout@v4
+
+      - name: Установить Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Установить зависимости
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Линтинг (flake8)
+        run: flake8 src tests tools migrations
+
+      - name: Применить миграции
+        run: |
+          alembic upgrade head
+          alembic current
+          alembic downgrade base
+          alembic upgrade head
+
+      - name: Проверить SQL-скрипты
+        run: python tools/db_check.py
+
+      - name: Тесты хранилища и API
+        run: >
+          pytest tests/storage -v --cov=src/matrix_lab --cov-branch
+          --cov-report=term-missing --cov-report=xml
+
+      - name: Выгрузить описание API (OpenAPI)
+        run: python tools/export_openapi.py
+
+      - name: Сохранить отчёты
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-reports-py${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            docs/openapi.json
