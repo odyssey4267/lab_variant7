@@ -150,6 +150,11 @@ def create_app(engine: Optional[Engine] = None, create_tables: bool = False) -> 
     app.include_router(_analysis_router(get_session))
     app.include_router(_settings_router(get_session))
 
+    # --- уровень 3: интеллектуальный анализ ---
+    from .analytics_routes import build_router
+    app.include_router(build_router(get_session))
+    # --- конец уровня 3 ---
+
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
     def index() -> str:
         return INDEX_HTML
